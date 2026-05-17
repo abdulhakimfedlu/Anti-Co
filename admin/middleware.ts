@@ -4,12 +4,17 @@ import { NextResponse } from "next/server";
 // Routes accessible without authentication
 const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
-  "/sign-up(.*)",
   "/forgot-password(.*)",
   "/unauthorized(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  const url = new URL(req.url);
+  // Redirect any registration attempts to the sign-in page
+  if (url.pathname.startsWith("/sign-up")) {
+    return NextResponse.redirect(new URL("/sign-in", req.url));
+  }
+
   // If not a public route, require authentication
   if (!isPublicRoute(req)) {
     const { userId } = await auth();

@@ -143,23 +143,84 @@ export const AdminsService = {
     return admin ?? null;
   },
 
-  /** Ensure the seed Super Admin exists in the DB */
+  /** Ensure the seed Super Admin exists in the DB and is synced with Clerk */
   async ensureSuperAdmin(email: string, fullName: string) {
-    const existing = await AdminsService.getByEmail(email);
+    const emailLower = email.toLowerCase().trim();
+    let existing = await AdminsService.getByEmail(emailLower);
+    
+    // 1. Ensure the user exists in Clerk or retrieve their clerkId
+    let clerkId: string | null = existing?.clerkId ?? null;
+    
+    try {
+      const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
+      if (CLERK_SECRET_KEY) {
+        // Search for existing user in Clerk by email
+        const searchRes = await fetch(`https://api.clerk.com/v1/users?email_address=${encodeURIComponent(emailLower)}`, {
+          headers: { Authorization: `Bearer ${CLERK_SECRET_KEY}` }
+        });
+        if (searchRes.ok) {
+          const users = await searchRes.json() as any[];
+          if (users && users.length > 0) {
+            clerkId = users[0].id;
+            console.log(`✅ Super Admin already exists in Clerk: ${clerkId}`);
+          } else {
+            // User does not exist in Clerk, create them!
+            const firstName = fullName.split(" ")[0] || fullName;
+            const lastName = fullName.split(" ").slice(1).join(" ") || "";
+            const password = process.env.SEED_ADMIN_PASSWORD || "Adidig@#123";
+            
+            console.log(`🚀 Creating Super Admin in Clerk...`);
+            const createRes = await fetch("https://api.clerk.com/v1/users", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${CLERK_SECRET_KEY}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                email_address: [emailLower],
+                password: password,
+                first_name: firstName,
+                last_name: lastName
+              })
+            });
+            
+            if (createRes.ok) {
+              const createdUser = await createRes.json() as any;
+              clerkId = createdUser.id;
+              console.log(`✅ Super Admin successfully created in Clerk: ${clerkId}`);
+            } else {
+              const errData = await createRes.json() as any;
+              console.error("❌ Failed to create Super Admin in Clerk:", errData);
+            }
+          }
+        } else {
+          console.error("❌ Failed to query Clerk users:", await searchRes.text());
+        }
+      }
+    } catch (clerkErr) {
+      console.warn("⚠️  Error syncing Super Admin with Clerk:", clerkErr);
+    }
+
+    // 2. Insert or update the Super Admin record in the local database
     if (!existing) {
       await db.insert(admins).values({
         fullName,
-        email: email.toLowerCase(),
+        email: emailLower,
         role: "Super Admin",
         isActive: true,
+        clerkId: clerkId,
       });
-      console.log(`✅ Super Admin seeded: ${email}`);
-    } else if (existing.role !== "Super Admin") {
+      console.log(`✅ Super Admin seeded in local DB: ${emailLower}`);
+    } else {
+      const updates: any = { role: "Super Admin", updatedAt: new Date() };
+      if (clerkId && existing.clerkId !== clerkId) {
+        updates.clerkId = clerkId;
+      }
       await db
         .update(admins)
-        .set({ role: "Super Admin", updatedAt: new Date() })
-        .where(eq(admins.email, email.toLowerCase()));
-      console.log(`✅ Super Admin role restored for: ${email}`);
+        .set(updates)
+        .where(eq(admins.email, emailLower));
+      console.log(`✅ Super Admin role & Clerk ID verified for: ${emailLower}`);
     }
   },
 };
