@@ -1,0 +1,286 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  /* Semantic */
+  --background: #ffffff;
+  --foreground: #09090b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --border: #e4e4e7;
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  --primary: #f97316;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #f97316;
+  --accent: #ea580c;
+  --accent-foreground: #ffffff;
+  --ring: #f97316;
+
+  /* Hero orb gradient */
+  --color-hero-start: #ea580c;
+  --color-hero-mid: #f97316;
+  --color-hero-end: #ffffff;
+
+  /* Typography */
+  --font-sans: 'Inter', var(--font-ethiopic), system-ui, sans-serif;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+}
+
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+  --border: #27272a;
+  --card: #09090b;
+  --card-foreground: #fafafa;
+  --primary: #f97316;
+  --primary-foreground: #ffffff;
+  --secondary: #27272a;
+  --secondary-foreground: #f97316;
+  --accent: #ea580c;
+  --accent-foreground: #ffffff;
+  --ring: #f97316;
+
+  --color-hero-start: #ea580c;
+  --color-hero-mid: #9a3412;
+  --color-hero-end: #09090b;
+}
+
+/* ─── Theme mapping for Tailwind v4 ─────────────────────────── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-hero-start: var(--color-hero-start);
+  --color-hero-mid: var(--color-hero-mid);
+  --color-hero-end: var(--color-hero-end);
+  --font-sans: var(--font-sans);
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* ─── Utility classes ────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .gradient-text {
+  background: linear-gradient(135deg, #fdba74 0%, #f97316 50%, #ea580c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gold-badge {
+  background: linear-gradient(135deg, var(--color-gold-500), var(--color-gold-400));
+  color: var(--color-navy-950);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  padding: 0.25rem 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* ─── Focus ring ─────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.45;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+/* ─── Navbar glow border ─────────────────────────────────────── */
+/*  A pseudo-element trick: the outer wrapper holds the spinning   */
+/*  gradient; the inner bar clips it, leaving only a glowing rim.  */
+
+@keyframes glow-spin {
+  0% {
+    --glow-angle: 0deg;
+  }
+
+  100% {
+    --glow-angle: 360deg;
+  }
+}
+
+@property --glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.navbar-glow-wrapper {
+  position: relative;
+  border-radius: 1rem;
+  padding: 1.5px;
+  animation: glow-spin 3s linear infinite;
+  background: conic-gradient(from var(--glow-angle),
+      transparent 0deg,
+      transparent 60deg,
+      #f97316 90deg,
+      #fdba74 120deg,
+      #ea580c 150deg,
+      #f97316 180deg,
+      transparent 210deg,
+      transparent 360deg);
+}
+
+.navbar-glow-inner {
+  border-radius: calc(1rem - 1px);
+  background: var(--background);
+  height: 100%;
+  width: 100%;
+}
+
+.hero-submit-btn {
+  background: #09090b !important;
+  color: #fafafa !important;
+  box-shadow: 0 8px 24px -8px rgba(9, 9, 11, 0.5) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.hero-submit-btn:hover {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 30px -8px color-mix(in srgb, var(--primary) 60%, transparent) !important;
+  transform: translateY(-2px) !important;
+}
+
+.hero-submit-btn:active {
+  background: var(--accent) !important;
+  transform: translateY(0) scale(0.98) !important;
+}
+
+/* ─── Professional Button Hover Effects ──────────────────────── */
+a[style*="var(--primary)"],
+button[style*="var(--primary)"],
+a[style*="var(--accent)"],
+button[style*="var(--accent)"],
+.btn-primary {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease !important;
+}
+
+a[style*="var(--primary)"]:hover,
+button[style*="var(--primary)"]:hover,
+.btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--primary) 60%, transparent) !important;
+  filter: brightness(1.1) !important;
+}
+
+a[style*="var(--accent)"]:hover,
+button[style*="var(--accent)"]:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--accent) 60%, transparent) !important;
+  filter: brightness(1.1) !important;
+}
+
+a[style*="var(--primary)"]:active,
+button[style*="var(--primary)"]:active,
+.btn-primary:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--primary) 60%, transparent) !important;
+}
+
+a[style*="var(--accent)"]:active,
+button[style*="var(--accent)"]:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--accent) 60%, transparent) !important;
+}
+
+/* ─── Premium Underline Accent ───────────────────────────────── */
