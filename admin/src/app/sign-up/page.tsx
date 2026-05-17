@@ -223,7 +223,7 @@ function SignUpForm() {
             </div>
             {i < stepLabels.length - 1 && (
               <div
-                className="h-px w-12 mb-4 transition-all duration-500"
+                className="h-px w-8 sm:w-12 mb-4 transition-all duration-500"
                 style={{ background: i < stepIndex ? "var(--primary)" : "var(--border)" }}
               />
             )}
@@ -236,7 +236,7 @@ function SignUpForm() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="rounded-3xl p-8 shadow-2xl"
+        className="rounded-3xl p-5 xs:p-6 sm:p-8 shadow-2xl"
         style={{
           background: "var(--card)",
           border: "1px solid var(--border)",

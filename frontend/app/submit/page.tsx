@@ -283,7 +283,7 @@ export default function SubmitComplaintPage() {
 
             {status === "success" ? (
               // Success Receipt State
-              <div className="p-8 sm:p-12 flex flex-col items-center text-center">
+              <div className="p-5 sm:p-10 md:p-12 flex flex-col items-center text-center">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -305,7 +305,7 @@ export default function SubmitComplaintPage() {
                   <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "var(--muted-foreground)" }}>
                     {t.form.refLabel}
                   </p>
-                  <p className="text-2xl sm:text-3xl font-black font-mono tracking-widest text-primary bg-background py-4 px-2 rounded-xl shadow-sm border" style={{ borderColor: "var(--border)" }}>
+                  <p className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black font-mono tracking-widest text-primary bg-background py-4 px-2 rounded-xl shadow-sm border" style={{ borderColor: "var(--border)" }}>
                     {referenceId}
                   </p>
                   <p className="text-xs mt-4 opacity-80" style={{ color: "var(--muted-foreground)" }}>

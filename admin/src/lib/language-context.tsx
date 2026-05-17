@@ -10,14 +10,14 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  locale: "en",
+  locale: "am",
   setLocale: () => {},
-  t: adminTranslations.en,
+  t: adminTranslations.am,
 });
 
 export function AdminLanguageProvider({ children }: { children: React.ReactNode }) {
-  // Always start with "en" so server and first client render match (no hydration mismatch)
-  const [locale, setLocaleState] = useState<Locale>("en");
+  // Always start with "am" so server and first client render match (no hydration mismatch)
+  const [locale, setLocaleState] = useState<Locale>("am");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -41,11 +41,11 @@ export function AdminLanguageProvider({ children }: { children: React.ReactNode 
     }
   };
 
-  // Always use "en" translations on the server / before mount to avoid mismatch
-  const t = mounted ? adminTranslations[locale] : adminTranslations.en;
+  // Always use "am" translations on the server / before mount to avoid mismatch
+  const t = mounted ? adminTranslations[locale] : adminTranslations.am;
 
   return (
-    <LanguageContext.Provider value={{ locale: mounted ? locale : "en", setLocale, t }}>
+    <LanguageContext.Provider value={{ locale: mounted ? locale : "am", setLocale, t }}>
       {children}
     </LanguageContext.Provider>
   );

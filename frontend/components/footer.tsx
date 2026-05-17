@@ -37,7 +37,7 @@ const Footer = () => {
     >
       {/* CTA Banner */}
       <div
-        className="rounded-3xl p-8 sm:p-12 mb-12 flex flex-col sm:flex-row items-center justify-between gap-6"
+        className="rounded-3xl p-6 sm:p-10 md:p-12 mb-12 flex flex-col sm:flex-row items-center justify-between gap-6"
         style={{
           background: "var(--primary)",
           boxShadow: "var(--shadow-lg)",
@@ -64,7 +64,7 @@ const Footer = () => {
 
       {/* Main footer body */}
       <div
-        className="rounded-3xl border p-8 sm:p-10"
+        className="rounded-3xl border p-5 sm:p-8 md:p-10"
         style={{
           borderColor: "var(--border)",
           background: "var(--card)",

@@ -40,8 +40,8 @@ const Hero = () => {
           {/* Headline - Solid Typography */}
           <motion.h1
             className={`font-black uppercase tracking-tight leading-[1.1] ${locale === "am"
-              ? "text-4xl sm:text-5xl lg:text-6xl"
-              : "text-5xl sm:text-6xl lg:text-7xl"
+              ? "text-2xl sm:text-4xl md:text-5xl lg:text-6xl"
+              : "text-3xl sm:text-5xl md:text-6xl lg:text-7xl"
               }`}
             style={{ color: "var(--foreground)" }}
             initial={{ opacity: 0, y: 20 }}
