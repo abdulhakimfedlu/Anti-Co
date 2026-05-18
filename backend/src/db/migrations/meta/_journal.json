@@ -8,6 +8,13 @@
       "when": 1778970625381,
       "tag": "0000_mature_sinister_six",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1779094769761,
+      "tag": "0001_empty_wilson_fisk",
+      "breakpoints": true
     }
   ]
 }

@@ -25,6 +25,8 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useAdminLanguage } from "@/lib/language-context";
 import useSWR from "swr";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { useToast } from "@/components/providers/ToastProvider";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -56,8 +58,9 @@ const emptyForm: ServiceForm = {
 };
 
 export default function ServicesPage() {
-  const { t } = useAdminLanguage();
+  const { t, locale } = useAdminLanguage();
   const ts = t.services;
+  const { success, error: toastError } = useToast();
 
   const { data, mutate } = useSWR(`${API}?all=true`, fetcher);
   const services: any[] = data?.data || [];
@@ -67,6 +70,7 @@ export default function ServicesPage() {
   const [form, setForm] = React.useState<ServiceForm>(emptyForm);
   const [submitted, setSubmitted] = React.useState(false);
   const [deleting, setDeleting] = React.useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<any | null>(null);
   const [loading, setLoading] = React.useState(false);
 
   const selectedCategory = categoryOptions.find((c) => c.value === form.category);
@@ -119,14 +123,33 @@ export default function ServicesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(ts.deleteConfirm)) return;
-    setDeleting(id);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(deleteTarget.id);
     try {
-      await fetch(`${API}/${id}`, { method: "DELETE" });
-      await mutate();
+      const res = await fetch(`${API}/${deleteTarget.id}`, { method: "DELETE" });
+      if (res.ok) {
+        success(
+          locale === "am" ? "አገልግሎት ተሰርዟል" : "Service Deleted",
+          locale === "am"
+            ? `"${deleteTarget.title}" በተሳካ ሁኔታ ተሰርዟል።`
+            : `"${deleteTarget.title}" has been deleted successfully.`
+        );
+        await mutate();
+      } else {
+        toastError(
+          locale === "am" ? "ስረዛው አልተሳካም" : "Delete Failed",
+          locale === "am" ? "አገልግሎቱን መሰረዝ አልተቻለም።" : "Could not delete service."
+        );
+      }
+    } catch (err) {
+      toastError(
+        locale === "am" ? "የኔትወርክ ስህተት" : "Network Error",
+        locale === "am" ? "ከአገልጋዩ ጋር መገናኘት አልተቻለም።" : "Could not connect to the server."
+      );
     } finally {
       setDeleting(null);
+      setDeleteTarget(null);
     }
   };
 
@@ -465,7 +488,7 @@ export default function ServicesPage() {
                         <Pencil size={14} />
                       </button>
                       <button
-                        onClick={() => handleDelete(svc.id)}
+                        onClick={() => setDeleteTarget(svc)}
                         disabled={deleting === svc.id}
                         title={ts.deleteBtn}
                         className="p-1.5 rounded-lg transition-colors"
@@ -508,6 +531,22 @@ export default function ServicesPage() {
             })}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title={locale === "am" ? "አገልግሎት ሰርዝ" : "Delete Service"}
+        message={
+          locale === "am"
+            ? `"${deleteTarget?.title}" የሚለውን አገልግሎት ለመሰረዝ እርግጠኛ ነዎት? ይህ ድርጊት ሊመለስ አይችልም።`
+            : `Are you sure you want to delete "${deleteTarget?.title}"? This action cannot be undone.`
+        }
+        confirmLabel={deleting === deleteTarget?.id ? (locale === "am" ? "እየሰረዘ..." : "Deleting...") : ts.deleteBtn}
+        cancelLabel={locale === "am" ? "ይቅር" : "Cancel"}
+        variant="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

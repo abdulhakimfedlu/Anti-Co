@@ -23,7 +23,7 @@ import useSWR from "swr";
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function Messages() {
-  const { t } = useAdminLanguage();
+  const { t, locale } = useAdminLanguage();
   const tm = t.messages;
 
   const [activeTab, setActiveTab] = React.useState<"new" | "resolved">("new");
@@ -33,6 +33,7 @@ export default function Messages() {
 
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
 
   // Auto-select first message when data loads
   React.useEffect(() => {
@@ -41,8 +42,36 @@ export default function Messages() {
     }
   }, [activeMessages, selectedId]);
 
-  const filteredMessages = activeMessages; // API already filters by activeTab
-  const selectedMessage = activeMessages.find((m: any) => m.id === selectedId) || activeMessages[0];
+  const filteredMessages = activeMessages.filter((msg: any) => {
+    if (!searchQuery.trim()) return true;
+    
+    let query = searchQuery.trim().toLowerCase();
+    if (query.startsWith('#')) {
+      query = query.substring(1);
+    }
+    
+    // Match code (reference code / coupon code like #9A2F)
+    const shortCode = msg.id.split("-")[0].toUpperCase();
+    const fullId = msg.id.toLowerCase();
+    
+    // Match name (senderName) - supporting localized translations for anonymous submissions
+    const namesToMatch = (msg.isAnonymous || !msg.senderName 
+      ? ["anonymous", "ስውር", "ስም-አልባ"] 
+      : [msg.senderName.toLowerCase()]
+    );
+    
+    // Match subject and body content
+    const subject = (msg.subject || "").toLowerCase();
+    const body = (msg.body || "").toLowerCase();
+    
+    const matchesCode = shortCode.toLowerCase().includes(query) || fullId.includes(query);
+    const matchesName = namesToMatch.some((n: string) => n.includes(query));
+    const matchesContent = subject.includes(query) || body.includes(query);
+    
+    return matchesCode || matchesName || matchesContent;
+  });
+
+  const selectedMessage = filteredMessages.find((m: any) => m.id === selectedId) || filteredMessages[0];
 
   const handleSelectMessage = (id: string) => {
     setSelectedId(id);
@@ -102,6 +131,8 @@ export default function Messages() {
             <input
               type="text"
               placeholder={tm.searchPlaceholder}
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-2 rounded-xl text-sm outline-none transition-all"
               style={{ background: "var(--muted)", color: "var(--foreground)", border: "1px solid var(--border)" }}
               suppressHydrationWarning
@@ -283,14 +314,111 @@ export default function Messages() {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 p-5 sm:p-6 overflow-y-auto custom-scrollbar">
-                  <h2 className="text-lg font-black mb-4 leading-snug" style={{ color: "var(--foreground)" }}>{selectedMessage.subject}</h2>
-                  <div className="space-y-4 text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                    <div
-                      className="p-4 rounded-xl text-sm italic leading-relaxed whitespace-pre-wrap"
-                      style={{ background: "color-mix(in srgb, var(--primary) 5%, transparent)", borderLeft: "3px solid var(--primary)", color: "var(--foreground)" }}
-                    >
-                      {selectedMessage.body}
+                <div className="flex-1 p-5 sm:p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6">
+                  <div>
+                    <h2 className="text-lg font-black mb-4 leading-snug" style={{ color: "var(--foreground)" }}>{selectedMessage.subject}</h2>
+                    <div className="space-y-4 text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                      <div
+                        className="p-4 rounded-xl text-sm italic leading-relaxed whitespace-pre-wrap"
+                        style={{ background: "color-mix(in srgb, var(--primary) 5%, transparent)", borderLeft: "3px solid var(--primary)", color: "var(--foreground)" }}
+                      >
+                        {selectedMessage.body}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Details Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                    {/* Reporter Information (only if not anonymous) */}
+                    {!selectedMessage.isAnonymous && (
+                      <div className="p-5 rounded-2xl border bg-muted/10 flex flex-col gap-4" style={{ borderColor: "var(--border)" }}>
+                        <div className="flex items-center gap-2 pb-2 border-b" style={{ borderColor: "var(--border)" }}>
+                          <div className="h-2 w-2 rounded-full" style={{ background: "var(--primary)" }} />
+                          <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: "var(--foreground)" }}>
+                            {locale === "am" ? "የጠቋሚው ግላዊ መረጃ" : "Reporter Personal Details"}
+                          </h4>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs leading-relaxed">
+                          <div>
+                            <p className="font-bold" style={{ color: "var(--muted-foreground)" }}>{locale === "am" ? "ሙሉ ስም" : "Full Name"}</p>
+                            <p className="font-extrabold mt-0.5" style={{ color: "var(--foreground)" }}>{selectedMessage.senderName || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="font-bold" style={{ color: "var(--muted-foreground)" }}>{locale === "am" ? "ስልክ ቁጥር" : "Phone Number"}</p>
+                            <p className="font-extrabold mt-0.5" style={{ color: "var(--foreground)" }}>{selectedMessage.senderEmail || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="font-bold" style={{ color: "var(--muted-foreground)" }}>{locale === "am" ? "ጾታ" : "Gender"}</p>
+                            <p className="font-extrabold mt-0.5" style={{ color: "var(--foreground)" }}>{selectedMessage.gender || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="font-bold" style={{ color: "var(--muted-foreground)" }}>{locale === "am" ? "ዕድሜ" : "Age"}</p>
+                            <p className="font-extrabold mt-0.5" style={{ color: "var(--foreground)" }}>{selectedMessage.age || "N/A"}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <p className="font-bold" style={{ color: "var(--muted-foreground)" }}>{locale === "am" ? "የትምህርት ደረጃ" : "Education Level"}</p>
+                            <p className="font-extrabold mt-0.5" style={{ color: "var(--foreground)" }}>{selectedMessage.educationLevel || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="font-bold" style={{ color: "var(--muted-foreground)" }}>{locale === "am" ? "ክፍለ ከተማ" : "Subcity"}</p>
+                            <p className="font-extrabold mt-0.5" style={{ color: "var(--foreground)" }}>{selectedMessage.subcity || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="font-bold" style={{ color: "var(--muted-foreground)" }}>{locale === "am" ? "ወረዳ" : "Woreda"}</p>
+                            <p className="font-extrabold mt-0.5" style={{ color: "var(--foreground)" }}>{selectedMessage.woreda || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="font-bold" style={{ color: "var(--muted-foreground)" }}>{locale === "am" ? "የቤት ቁጥር" : "House Number"}</p>
+                            <p className="font-extrabold mt-0.5" style={{ color: "var(--foreground)" }}>{selectedMessage.houseNumber || "N/A"}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <p className="font-bold" style={{ color: "var(--muted-foreground)" }}>{locale === "am" ? "ልዩ ቦታ" : "Specific Place"}</p>
+                            <p className="font-extrabold mt-0.5" style={{ color: "var(--foreground)" }}>{selectedMessage.specificPlace || "N/A"}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Complaint/Injustice details (Suspect & Location) */}
+                    <div className={`p-5 rounded-2xl border bg-muted/10 flex flex-col gap-4 ${selectedMessage.isAnonymous ? 'col-span-2' : ''}`} style={{ borderColor: "var(--border)" }}>
+                      <div className="flex items-center gap-2 pb-2 border-b" style={{ borderColor: "var(--border)" }}>
+                        <div className="h-2 w-2 rounded-full bg-red-500" />
+                        <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: "var(--foreground)" }}>
+                          {locale === "am" ? "የጥቆማ/ሪፖርት ዝርዝር መረጃ" : "Report & Suspect Details"}
+                        </h4>
+                      </div>
+                      
+                      <div className="space-y-4 text-xs leading-relaxed">
+                        <div>
+                          <p className="font-bold text-red-500/80 dark:text-red-400/80" style={{ color: "var(--muted-foreground)" }}>
+                            {locale === "am" ? "የተጠርጣሪው/የሪፖርት የተደረገው ሰው ስም" : "Name of Suspected / Reported Person"}
+                          </p>
+                          <p className="text-sm font-extrabold mt-1 text-red-500 dark:text-red-400">
+                            {selectedMessage.suspectName || (locale === "am" ? "ያልተጠቀሰ" : "Not Specified")}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <p className="font-bold" style={{ color: "var(--muted-foreground)" }}>
+                            {locale === "am" ? "ድርጊቱ የተፈጸመበት (ክፍለ ከተማ / ወረዳ)" : "Injustice Occurred At (Subcity / Woreda)"}
+                          </p>
+                          <p className="font-extrabold mt-1" style={{ color: "var(--foreground)" }}>
+                            {selectedMessage.incidentLocation || (locale === "am" ? "ያልተጠቀሰ" : "Not Specified")}
+                          </p>
+                        </div>
+
+                        {selectedMessage.isAnonymous && (
+                          <div className="p-3.5 rounded-xl border border-dashed flex items-center gap-2.5 bg-background/50 mt-2" style={{ borderColor: "var(--border)" }}>
+                            <Shield size={16} className="text-muted-foreground flex-shrink-0" />
+                            <p className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                              {locale === "am"
+                                ? "ይህ ጥቆማ በስውር የቀረበ በመሆኑ የጠቋሚው ግላዊ መረጃ ጥበቃ ተደርጎበታል።"
+                                : "This tip was submitted anonymously; reporter personal information is fully protected."}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

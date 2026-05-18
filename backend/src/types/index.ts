@@ -2,13 +2,22 @@ import { z } from "zod";
 
 // ─── Message Schemas ─────────────────────────────────────────
 export const submitMessageSchema = z.object({
-  senderName: z.string().min(1).max(200).optional(),
-  senderEmail: z.string().email().optional(),
+  senderName: z.string().min(1).max(200).optional().nullable(),
+  senderEmail: z.string().max(100).optional().nullable(),
   isAnonymous: z.boolean().default(false),
   subject: z.string().min(3).max(300),
   body: z.string().min(10).max(5000),
   category: z.string().min(1).max(100),
   priority: z.enum(["Low", "Medium", "High", "Urgent"]).default("Medium"),
+  woreda: z.string().max(100).optional().nullable(),
+  subcity: z.string().max(100).optional().nullable(),
+  houseNumber: z.string().max(100).optional().nullable(),
+  specificPlace: z.string().max(200).optional().nullable(),
+  gender: z.string().max(50).optional().nullable(),
+  age: z.string().max(50).optional().nullable(),
+  educationLevel: z.string().max(100).optional().nullable(),
+  incidentLocation: z.string().max(300).optional().nullable(),
+  suspectName: z.string().max(200).optional().nullable(),
 });
 
 export const messageFilterSchema = z.object({

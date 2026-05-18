@@ -1,0 +1,9 @@
+ALTER TABLE "messages" ADD COLUMN "woreda" text;--> statement-breakpoint
+ALTER TABLE "messages" ADD COLUMN "subcity" text;--> statement-breakpoint
+ALTER TABLE "messages" ADD COLUMN "house_number" text;--> statement-breakpoint
+ALTER TABLE "messages" ADD COLUMN "specific_place" text;--> statement-breakpoint
+ALTER TABLE "messages" ADD COLUMN "gender" text;--> statement-breakpoint
+ALTER TABLE "messages" ADD COLUMN "age" text;--> statement-breakpoint
+ALTER TABLE "messages" ADD COLUMN "education_level" text;--> statement-breakpoint
+ALTER TABLE "messages" ADD COLUMN "incident_location" text;--> statement-breakpoint
+ALTER TABLE "messages" ADD COLUMN "suspect_name" text;--> statement-breakpoint

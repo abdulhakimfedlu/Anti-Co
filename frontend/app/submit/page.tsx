@@ -19,7 +19,8 @@ import {
   Lock,
   ArrowRight,
   ShieldCheck,
-  Zap
+  Zap,
+  MapPin
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLanguage } from "@/lib/language-context";
@@ -34,6 +35,16 @@ interface FormData {
   service: string;
   description: string;
   isAnonymous: boolean;
+  // New Fields
+  woreda: string;
+  subcity: string;
+  houseNumber: string;
+  specificPlace: string;
+  gender: string;
+  age: string;
+  educationLevel: string;
+  incidentLocation: string;
+  suspectName: string;
 }
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -45,6 +56,16 @@ const INITIAL_FORM: FormData = {
   service: "",
   description: "",
   isAnonymous: false,
+  // New Fields
+  woreda: "",
+  subcity: "",
+  houseNumber: "",
+  specificPlace: "",
+  gender: "",
+  age: "",
+  educationLevel: "",
+  incidentLocation: "",
+  suspectName: "",
 };
 
 function validate(data: FormData, t: any): Partial<Record<keyof FormData, string>> {
@@ -118,11 +139,22 @@ export default function SubmitComplaintPage() {
     try {
       const payload: any = {
         senderName: form.isAnonymous ? "Anonymous" : form.fullName,
+        senderEmail: form.isAnonymous ? "" : form.phone,
         isAnonymous: form.isAnonymous,
         subject: form.subject,
         body: form.description,
         category: form.service,
         priority: "Medium",
+        // New Fields
+        woreda: form.isAnonymous ? "" : form.woreda,
+        subcity: form.isAnonymous ? "" : form.subcity,
+        houseNumber: form.isAnonymous ? "" : form.houseNumber,
+        specificPlace: form.isAnonymous ? "" : form.specificPlace,
+        gender: form.isAnonymous ? "" : form.gender,
+        age: form.isAnonymous ? "" : form.age,
+        educationLevel: form.isAnonymous ? "" : form.educationLevel,
+        incidentLocation: form.incidentLocation,
+        suspectName: form.suspectName,
       };
       
       const res = await fetch("http://localhost:4000/api/messages", {
@@ -442,6 +474,114 @@ export default function SubmitComplaintPage() {
                               error={touched.phone ? errors.phone : undefined}
                             />
                           </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                            <FormField
+                              id="subcity"
+                              name="subcity"
+                              label={t.form.subcity}
+                              icon={MapPin}
+                              type="text"
+                              placeholder={t.form.subcityPlaceholder}
+                              value={form.subcity}
+                              onChange={handleChange}
+                            />
+                            <FormField
+                              id="woreda"
+                              name="woreda"
+                              label={t.form.woreda}
+                              icon={MapPin}
+                              type="text"
+                              placeholder={t.form.woredaPlaceholder}
+                              value={form.woreda}
+                              onChange={handleChange}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                            <FormField
+                              id="houseNumber"
+                              name="houseNumber"
+                              label={t.form.houseNumber}
+                              icon={Lock}
+                              type="text"
+                              placeholder={t.form.houseNumberPlaceholder}
+                              value={form.houseNumber}
+                              onChange={handleChange}
+                            />
+                            <FormField
+                              id="specificPlace"
+                              name="specificPlace"
+                              label={t.form.specificPlace}
+                              icon={MapPin}
+                              type="text"
+                              placeholder={t.form.specificPlacePlaceholder}
+                              value={form.specificPlace}
+                              onChange={handleChange}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
+                            {/* Gender Select */}
+                            <div className="flex flex-col gap-2">
+                              <label htmlFor="gender" className="text-sm font-bold text-foreground">
+                                {t.form.gender}
+                              </label>
+                              <div className="relative group">
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+                                <select
+                                  id="gender"
+                                  name="gender"
+                                  value={form.gender}
+                                  onChange={handleChange}
+                                  className="w-full appearance-none rounded-lg border-2 pl-12 pr-4 py-2.5 text-base transition-all focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 bg-background hover:border-muted-foreground/30 text-foreground"
+                                >
+                                  <option value="" disabled>{t.form.genderPlaceholder}</option>
+                                  <option value="Male">{t.form.genderMale}</option>
+                                  <option value="Female">{t.form.genderFemale}</option>
+                                  <option value="Prefer Not to Say">{t.form.genderPreferNotToSay}</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            {/* Age Input */}
+                            <FormField
+                              id="age"
+                              name="age"
+                              label={t.form.age}
+                              icon={User}
+                              type="text"
+                              placeholder={t.form.agePlaceholder}
+                              value={form.age}
+                              onChange={handleChange}
+                            />
+
+                            {/* Level of Education Select */}
+                            <div className="flex flex-col gap-2">
+                              <label htmlFor="educationLevel" className="text-sm font-bold text-foreground">
+                                {t.form.educationLevel}
+                              </label>
+                              <div className="relative group">
+                                <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+                                <select
+                                  id="educationLevel"
+                                  name="educationLevel"
+                                  value={form.educationLevel}
+                                  onChange={handleChange}
+                                  className="w-full appearance-none rounded-lg border-2 pl-12 pr-4 py-2.5 text-base transition-all focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 bg-background hover:border-muted-foreground/30 text-foreground"
+                                >
+                                  <option value="" disabled>{t.form.educationLevelPlaceholder}</option>
+                                  <option value="Uneducated">{t.form.educationUneducated}</option>
+                                  <option value="Up to Grade 4">{t.form.educationGrade4}</option>
+                                  <option value="Up to Grade 8">{t.form.educationGrade8}</option>
+                                  <option value="Up to Grade 10">{t.form.educationGrade10}</option>
+                                  <option value="Up to Grade 12 (Diploma)">{t.form.educationGrade12}</option>
+                                  <option value="Holds Degree and Above">{t.form.educationDegree}</option>
+                                  <option value="Prefer Not to Say">{t.form.educationPreferNotToSay}</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </motion.div>
                     )}
@@ -494,6 +634,29 @@ export default function SubmitComplaintPage() {
                         </select>
                       </div>
                       {touched.service && errors.service && <FieldError message={errors.service} />}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <FormField
+                        id="incidentLocation"
+                        name="incidentLocation"
+                        label={t.form.incidentLocation}
+                        icon={MapPin}
+                        type="text"
+                        placeholder={t.form.incidentLocationPlaceholder}
+                        value={form.incidentLocation}
+                        onChange={handleChange}
+                      />
+                      <FormField
+                        id="suspectName"
+                        name="suspectName"
+                        label={t.form.suspectName}
+                        icon={User}
+                        type="text"
+                        placeholder={t.form.suspectNamePlaceholder}
+                        value={form.suspectName}
+                        onChange={handleChange}
+                      />
                     </div>
 
                     <div className="flex flex-col gap-2">
